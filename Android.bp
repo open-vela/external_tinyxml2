@@ -1,4 +1,4 @@
-cc_library_static {
+cc_library {
     name: "libtinyxml2",
     host_supported: true,
 
@@ -11,6 +11,9 @@ cc_library_static {
                 "-DDEBUG",
                 "-DANDROID_NDK",
             ],
+            shared: {
+              shared_libs: ["liblog"],
+            },
         },
     },
 
