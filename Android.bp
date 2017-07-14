@@ -5,6 +5,8 @@ cc_library {
 
     srcs: ["tinyxml2.cpp"],
 
+    shared_libs: ["liblog"],
+
     target: {
         android: {
             cflags: [
@@ -12,9 +14,6 @@ cc_library {
                 "-DDEBUG",
                 "-DANDROID_NDK",
             ],
-            shared: {
-              shared_libs: ["liblog"],
-            },
         },
     },
 
