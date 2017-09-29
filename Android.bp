@@ -8,6 +8,8 @@ cc_library {
 
     srcs: ["tinyxml2.cpp"],
 
+    cflags: ["-Wall", "-Werror"],
+
     shared_libs: ["liblog"],
 
     target: {
