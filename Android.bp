@@ -12,6 +12,8 @@ cc_library {
     cflags: [
         "-Wall",
         "-Werror",
+        "-Wno-implicit-fallthrough",
+        // tinyxml2.cpp line 436, 441, 446 have -Wimplicit-fallthrough.
     ],
 
     shared_libs: ["liblog"],
