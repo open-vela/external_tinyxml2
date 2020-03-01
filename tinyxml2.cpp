@@ -617,17 +617,17 @@ bool XMLUtil::ToBool( const char* str, bool* value )
         *value = (ival==0) ? false : true;
         return true;
     }
-    static const char* TRUE_VALS[] = { "true", "True", "TRUE", 0 };
-    static const char* FALSE_VALS[] = { "false", "False", "FALSE", 0 };
+    static const char* TRUE[] = { "true", "True", "TRUE", 0 };
+    static const char* FALSE[] = { "false", "False", "FALSE", 0 };
 
-    for (int i = 0; TRUE_VALS[i]; ++i) {
-        if (StringEqual(str, TRUE_VALS[i])) {
+    for (int i = 0; TRUE[i]; ++i) {
+        if (StringEqual(str, TRUE[i])) {
             *value = true;
             return true;
         }
     }
-    for (int i = 0; FALSE_VALS[i]; ++i) {
-        if (StringEqual(str, FALSE_VALS[i])) {
+    for (int i = 0; FALSE[i]; ++i) {
+        if (StringEqual(str, FALSE[i])) {
             *value = false;
             return true;
         }
@@ -1960,6 +1960,46 @@ XMLAttribute* XMLElement::CreateAttribute()
     attrib->_memPool->SetTracked();
     return attrib;
 }
+
+
+XMLElement* XMLElement::PushNewChildElement(const char* name)
+{
+    XMLElement* element = _document->NewElement(name);
+    // by construction, the new element has the same Document, so this
+    // call will always succeed
+    InsertEndChild(element);
+    return element;
+}
+
+XMLComment* XMLElement::PushNewChildComment(const char* comment)
+{
+    XMLComment* element = _document->NewComment(comment);
+    InsertEndChild(element);
+    return element;
+}
+
+XMLText* XMLElement::PushNewChildText(const char* text)
+{
+    XMLText* element = _document->NewText(text);
+    InsertEndChild(element);
+    return element;
+}
+
+XMLDeclaration* XMLElement::PushNewChildDeclaration(const char* text)
+{
+    XMLDeclaration* element = _document->NewDeclaration(text);
+    InsertEndChild(element);
+    return element;
+}
+
+XMLUnknown* XMLElement::PushNewUnknown(const char* text)
+{
+    XMLUnknown* element = _document->NewUnknown(text);
+    InsertEndChild(element);
+    return element;
+}
+
+
 
 //
 //	<ele></ele>
