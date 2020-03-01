@@ -48,8 +48,6 @@ set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 # to distinguish between debug and release lib
 set(CMAKE_DEBUG_POSTFIX "d")
 
-set(TARGETS_EXPORT_NAME "${CMAKE_PROJECT_NAME}Targets")
-
 add_library(tinyxml2 tinyxml2.cpp tinyxml2.h)
 
 set_target_properties(tinyxml2 PROPERTIES
@@ -75,13 +73,12 @@ else()
     endif(MSVC)
 endif()
 
-# Export cmake script that can be used by downstream project
-# via `include()`
+# export targets for find_package config mode
 export(TARGETS tinyxml2
-      FILE ${CMAKE_BINARY_DIR}/${TARGETS_EXPORT_NAME}.cmake)
+      FILE ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Targets.cmake)
 
 install(TARGETS tinyxml2
-        EXPORT ${TARGETS_EXPORT_NAME}
+        EXPORT ${CMAKE_PROJECT_NAME}Targets
         RUNTIME 
                 DESTINATION ${CMAKE_INSTALL_BINDIR}
                 COMPONENT tinyxml2_runtime
@@ -124,6 +121,7 @@ if(NOT TARGET uninstall)
 endif()
 
 include(CMakePackageConfigHelpers)
+set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
 configure_package_config_file(
   "Config.cmake.in"
   "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake"
@@ -140,7 +138,6 @@ install(FILES
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}
         COMPONENT tinyxml2_config)
 
-# Export targets for find_package config mode
-install(EXPORT ${TARGETS_EXPORT_NAME} NAMESPACE tinyxml2::
+install(EXPORT ${CMAKE_PROJECT_NAME}Targets NAMESPACE tinyxml2::
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}
         COMPONENT tinyxml2_config)

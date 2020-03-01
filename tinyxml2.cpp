@@ -100,20 +100,6 @@ distribution.
 	#define TIXML_SSCANF   sscanf
 #endif
 
-#if defined(_WIN64)
-	#define TIXML_FSEEK _fseeki64
-	#define TIXML_FTELL _ftelli64
-#elif defined(__APPLE__)
-	#define TIXML_FSEEK fseeko
-	#define TIXML_FTELL ftello
-#elif defined(__x86_64__)
-	#define TIXML_FSEEK fseeko64
-	#define TIXML_FTELL ftello64
-#else
-	#define TIXML_FSEEK fseek
-	#define TIXML_FTELL ftell
-#endif
-
 
 static const char LINE_FEED				= static_cast<char>(0x0a);			// all line endings are normalized to LF
 static const char LF = LINE_FEED;
@@ -1975,46 +1961,6 @@ XMLAttribute* XMLElement::CreateAttribute()
     return attrib;
 }
 
-
-XMLElement* XMLElement::PushNewChildElement(const char* name)
-{
-    XMLElement* element = _document->NewElement(name);
-    // by construction, the new element has the same Document, so this
-    // call will always succeed
-    InsertEndChild(element);
-    return element;
-}
-
-XMLComment* XMLElement::PushNewChildComment(const char* comment)
-{
-    XMLComment* element = _document->NewComment(comment);
-    InsertEndChild(element);
-    return element;
-}
-
-XMLText* XMLElement::PushNewChildText(const char* text)
-{
-    XMLText* element = _document->NewText(text);
-    InsertEndChild(element);
-    return element;
-}
-
-XMLDeclaration* XMLElement::PushNewChildDeclaration(const char* text)
-{
-    XMLDeclaration* element = _document->NewDeclaration(text);
-    InsertEndChild(element);
-    return element;
-}
-
-XMLUnknown* XMLElement::PushNewUnknown(const char* text)
-{
-    XMLUnknown* element = _document->NewUnknown(text);
-    InsertEndChild(element);
-    return element;
-}
-
-
-
 //
 //	<ele></ele>
 //	<ele>foo<b>bar</b></ele>
@@ -2155,7 +2101,7 @@ XMLDocument::~XMLDocument()
 }
 
 
-void XMLDocument::MarkInUse(XMLNode* node)
+void XMLDocument::MarkInUse(const XMLNode* const node)
 {
 	TIXMLASSERT(node);
 	TIXMLASSERT(node->_parent == 0);
@@ -2307,26 +2253,49 @@ XMLError XMLDocument::LoadFile( const char* filename )
     return _errorID;
 }
 
+// This is likely overengineered template art to have a check that unsigned long value incremented
+// by one still fits into size_t. If size_t type is larger than unsigned long type
+// (x86_64-w64-mingw32 target) then the check is redundant and gcc and clang emit
+// -Wtype-limits warning. This piece makes the compiler select code with a check when a check
+// is useful and code with no check when a check is redundant depending on how size_t and unsigned long
+// types sizes relate to each other.
+template
+<bool = (sizeof(unsigned long) >= sizeof(size_t))>
+struct LongFitsIntoSizeTMinusOne {
+    static bool Fits( unsigned long value )
+    {
+        return value < static_cast<size_t>(-1);
+    }
+};
+
+template <>
+struct LongFitsIntoSizeTMinusOne<false> {
+    static bool Fits( unsigned long )
+    {
+        return true;
+    }
+};
+
 XMLError XMLDocument::LoadFile( FILE* fp )
 {
     Clear();
 
-    TIXML_FSEEK( fp, 0, SEEK_SET );
+    fseek( fp, 0, SEEK_SET );
     if ( fgetc( fp ) == EOF && ferror( fp ) != 0 ) {
         SetError( XML_ERROR_FILE_READ_ERROR, 0, 0 );
         return _errorID;
     }
 
-    TIXML_FSEEK( fp, 0, SEEK_END );
-    const long long filelength = TIXML_FTELL( fp );
-    TIXML_FSEEK( fp, 0, SEEK_SET );
+    fseek( fp, 0, SEEK_END );
+    const long filelength = ftell( fp );
+    fseek( fp, 0, SEEK_SET );
     if ( filelength == -1L ) {
         SetError( XML_ERROR_FILE_READ_ERROR, 0, 0 );
         return _errorID;
     }
     TIXMLASSERT( filelength >= 0 );
 
-    if ( filelength >= static_cast<size_t>(-1) ) {
+    if ( !LongFitsIntoSizeTMinusOne<>::Fits( filelength ) ) {
         // Cannot handle files which won't fit in buffer together with null terminator
         SetError( XML_ERROR_FILE_READ_ERROR, 0, 0 );
         return _errorID;
