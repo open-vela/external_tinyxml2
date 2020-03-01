@@ -562,7 +562,7 @@ public:
         TIXMLASSERT( p );
         return p;
     }
-    static char* SkipWhiteSpace( char* p, int* curLineNumPtr )				{
+    static char* SkipWhiteSpace( char* const p, int* curLineNumPtr ) {
         return const_cast<char*>( SkipWhiteSpace( const_cast<const char*>(p), curLineNumPtr ) );
     }
 
@@ -600,7 +600,7 @@ public:
         return strncmp( p, q, nChar ) == 0;
     }
 
-    inline static bool IsUTF8Continuation( char p ) {
+    inline static bool IsUTF8Continuation( const char p ) {
         return ( p & 0x80 ) != 0;
     }
 
@@ -1640,22 +1640,7 @@ public:
 	/// See QueryIntText()
 	double DoubleText(double defaultValue = 0) const;
 	/// See QueryIntText()
-    float FloatText(float defaultValue = 0) const;
-
-    /**
-        Convenience method to create a new XMLElement and add it as last (right)
-        child of this node. Returns the created and inserted element.
-    */
-    XMLElement* PushNewChildElement(const char* name);
-    /// See PushNewChildElement()
-    XMLComment* PushNewChildComment(const char* comment);
-    /// See PushNewChildElement()
-    XMLText* PushNewChildText(const char* text);
-    /// See PushNewChildElement()
-    XMLDeclaration* PushNewChildDeclaration(const char* text);
-    /// See PushNewChildElement()
-    XMLUnknown* PushNewUnknown(const char* text);
-
+	float FloatText(float defaultValue = 0) const;
 
     // internal:
     enum ElementClosingType {
@@ -1909,7 +1894,7 @@ public:
     char* Identify( char* p, XMLNode** node );
 
 	// internal
-	void MarkInUse(XMLNode*);
+	void MarkInUse(const XMLNode* const);
 
     virtual XMLNode* ShallowClone( XMLDocument* /*document*/ ) const	{
         return 0;
