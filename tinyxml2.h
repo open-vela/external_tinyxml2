@@ -98,12 +98,12 @@ distribution.
 /* Versioning, past 1.0.14:
 	http://semver.org/
 */
-static const int TIXML2_MAJOR_VERSION = 8;
-static const int TIXML2_MINOR_VERSION = 0;
+static const int TIXML2_MAJOR_VERSION = 7;
+static const int TIXML2_MINOR_VERSION = 1;
 static const int TIXML2_PATCH_VERSION = 0;
 
-#define TINYXML2_MAJOR_VERSION 8
-#define TINYXML2_MINOR_VERSION 0
+#define TINYXML2_MAJOR_VERSION 7
+#define TINYXML2_MINOR_VERSION 1
 #define TINYXML2_PATCH_VERSION 0
 
 // A fixed element depth limit is problematic. There needs to be a
@@ -562,7 +562,7 @@ public:
         TIXMLASSERT( p );
         return p;
     }
-    static char* SkipWhiteSpace( char* const p, int* curLineNumPtr ) {
+    static char* SkipWhiteSpace( char* p, int* curLineNumPtr )				{
         return const_cast<char*>( SkipWhiteSpace( const_cast<const char*>(p), curLineNumPtr ) );
     }
 
@@ -590,13 +590,6 @@ public:
                || ch == '-';
     }
 
-    inline static bool IsPrefixHex( const char* p) {
-        while (p && *p != '\0' && !isdigit(*p)) {
-            ++p;
-        }
-        return *p == '0' && ( *(p + 1) == 'x' || *(p + 1) == 'X');
-    }
-
     inline static bool StringEqual( const char* p, const char* q, int nChar=INT_MAX )  {
         if ( p == q ) {
             return true;
@@ -607,7 +600,7 @@ public:
         return strncmp( p, q, nChar ) == 0;
     }
 
-    inline static bool IsUTF8Continuation( const char p ) {
+    inline static bool IsUTF8Continuation( char p ) {
         return ( p & 0x80 ) != 0;
     }
 
@@ -1485,7 +1478,7 @@ public:
         XMLAttribute* a = FindOrCreateAttribute(name);
         a->SetAttribute(value);
     }
-
+    
     /// Sets the named attribute to value.
     void SetAttribute( const char* name, bool value )			{
         XMLAttribute* a = FindOrCreateAttribute( name );
@@ -1647,22 +1640,7 @@ public:
 	/// See QueryIntText()
 	double DoubleText(double defaultValue = 0) const;
 	/// See QueryIntText()
-    float FloatText(float defaultValue = 0) const;
-
-    /**
-        Convenience method to create a new XMLElement and add it as last (right)
-        child of this node. Returns the created and inserted element.
-    */
-    XMLElement* InsertNewChildElement(const char* name);
-    /// See InsertNewChildElement()
-    XMLComment* InsertNewComment(const char* comment);
-    /// See InsertNewChildElement()
-    XMLText* InsertNewText(const char* text);
-    /// See InsertNewChildElement()
-    XMLDeclaration* InsertNewDeclaration(const char* text);
-    /// See InsertNewChildElement()
-    XMLUnknown* InsertNewUnknown(const char* text);
-
+	float FloatText(float defaultValue = 0) const;
 
     // internal:
     enum ElementClosingType {
@@ -1916,7 +1894,7 @@ public:
     char* Identify( char* p, XMLNode** node );
 
 	// internal
-	void MarkInUse(const XMLNode* const);
+	void MarkInUse(XMLNode*);
 
     virtual XMLNode* ShallowClone( XMLDocument* /*document*/ ) const	{
         return 0;
