@@ -41,11 +41,11 @@ clean:
 distclean:
 	-$(RM) *.o xmltest libtinyxml2.a
 
-test: xmltest
+test: clean xmltest
 	./xmltest
 
 # Standard GNU target
-check: xmltest
+check: clean xmltest
 	./xmltest
 
 staticlib: libtinyxml2.a
