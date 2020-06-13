@@ -30,7 +30,9 @@ set(GENERIC_LIB_SOVERSION "8")
 ################################
 # Add targets
 # By Default shared library is being built
-# User can choose to build static library by using cmake -DBUILD_SHARED_LIBS:BOOL=OFF
+# To build static libs also - Do cmake . -DBUILD_STATIC_LIBS:BOOL=ON
+# User can choose not to build shared library by using cmake -DBUILD_SHARED_LIBS:BOOL=OFF
+# To build only static libs use cmake . -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_STATIC_LIBS:BOOL=ON
 # To build the tests, use cmake . -DBUILD_TESTS:BOOL=ON
 # To disable the building of the tests, use cmake . -DBUILD_TESTS:BOOL=OFF
 
@@ -49,7 +51,7 @@ set(CMAKE_DEBUG_POSTFIX "d")
 add_library(tinyxml2 tinyxml2.cpp tinyxml2.h)
 
 set_target_properties(tinyxml2 PROPERTIES
-	DEFINE_SYMBOL "TINYXML2_EXPORT"
+        COMPILE_DEFINITIONS "TINYXML2_EXPORT"
 	VERSION "${GENERIC_LIB_VERSION}"
 	SOVERSION "${GENERIC_LIB_SOVERSION}")
 
