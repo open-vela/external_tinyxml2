@@ -1,0 +1,10 @@
+#
+# For a description of the syntax of this configuration file,
+# see kconfig-language at https://www.kernel.org/doc/Documentation/kbuild/kconfig-language.txt
+#
+
+config LIB_TINYXML2
+	bool "Enable TinyXML-2"
+	default n
+	---help---
+		TinyXML-2 is a simple, small, efficient, C++ XML parser that can be easily integrated into other programs.
