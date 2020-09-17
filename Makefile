@@ -1,40 +1,75 @@
-############################################################################
-# external/tinyxml2/Makefile
-#
-#   Copyright (C) 2020 Xiaomi Inc. All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-#
-# 1. Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-# 2. Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in
-#    the documentation and/or other materials provided with the
-#    distribution.
-# 3. Neither the name NuttX nor the names of its contributors may be
-#    used to endorse or promote products derived from this software
-#    without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
-# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
-# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
-#
-############################################################################
+# For GNU conventions and targets see https://www.gnu.org/prep/standards/standards.html
+# Using GNU standards makes it easier for some users to keep doing what they are used to.
 
--include $(APPDIR)/Make.defs
+# 'mkdir -p' is non-portable, but it is widely supported. A portable solution
+# is elusive due to race conditions on testing the directory and creating it.
+# Anemic toolchain users can sidestep the problem using MKDIR="mkdir".
 
-CXXEXT  = .cpp
-CXXSRCS = tinyxml2.cpp
+AR = ar
+ARFLAGS = cr
+RM = rm -f
+RANLIB = ranlib
+MKDIR = mkdir -p
+CXXFLAGS = -fPIC
 
-include $(APPDIR)/Application.mk
+INSTALL = install
+INSTALL_PROGRAM = $(INSTALL)
+INSTALL_DATA = $(INSTALL) -m 644
+
+prefix = /usr/local
+bindir = $(prefix)/bin
+libdir = $(prefix)/lib
+includedir = $(prefix)/include
+
+all: xmltest staticlib
+
+rebuild: clean all
+
+xmltest: xmltest.cpp libtinyxml2.a
+
+effc:
+	gcc -Werror -Wall -Wextra -Wshadow -Wpedantic -Wformat-nonliteral \
+        -Wformat-security -Wswitch-default -Wuninitialized -Wundef \
+        -Wpointer-arith -Woverloaded-virtual -Wctor-dtor-privacy \
+        -Wnon-virtual-dtor -Woverloaded-virtual -Wsign-promo \
+        -Wno-unused-parameter -Weffc++ xmltest.cpp tinyxml2.cpp -o xmltest
+
+clean:
+	-$(RM) *.o xmltest libtinyxml2.a
+
+# Standard GNU target
+distclean:
+	-$(RM) *.o xmltest libtinyxml2.a
+
+test: xmltest
+	./xmltest
+
+# Standard GNU target
+check: xmltest
+	./xmltest
+
+staticlib: libtinyxml2.a
+
+libtinyxml2.a: tinyxml2.o
+	$(AR) $(ARFLAGS) $@ $^
+	$(RANLIB) $@
+
+tinyxml2.o: tinyxml2.cpp tinyxml2.h
+
+directories:
+	$(MKDIR) $(DESTDIR)$(prefix)
+	$(MKDIR) $(DESTDIR)$(bindir)
+	$(MKDIR) $(DESTDIR)$(libdir)
+	$(MKDIR) $(DESTDIR)$(includedir)
+
+# Standard GNU target.
+install: xmltest staticlib directories
+	$(INSTALL_PROGRAM) xmltest $(DESTDIR)$(bindir)/xmltest
+	$(INSTALL_DATA) tinyxml2.h $(DESTDIR)$(includedir)/tinyxml2.h
+	$(INSTALL_DATA) libtinyxml2.a $(DESTDIR)$(libdir)/libtinyxml2.a
+
+# Standard GNU target
+uninstall:
+	$(RM) $(DESTDIR)$(bindir)/xmltest
+	$(RM) $(DESTDIR)$(includedir)/tinyxml2.h
+	$(RM) $(DESTDIR)$(libdir)/libtinyxml2.a
