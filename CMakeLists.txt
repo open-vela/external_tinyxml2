@@ -30,9 +30,7 @@ set(GENERIC_LIB_SOVERSION "8")
 ################################
 # Add targets
 # By Default shared library is being built
-# To build static libs also - Do cmake . -DBUILD_STATIC_LIBS:BOOL=ON
-# User can choose not to build shared library by using cmake -DBUILD_SHARED_LIBS:BOOL=OFF
-# To build only static libs use cmake . -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_STATIC_LIBS:BOOL=ON
+# User can choose to build static library by using cmake -DBUILD_SHARED_LIBS:BOOL=OFF
 # To build the tests, use cmake . -DBUILD_TESTS:BOOL=ON
 # To disable the building of the tests, use cmake . -DBUILD_TESTS:BOOL=OFF
 
@@ -48,10 +46,12 @@ set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 # to distinguish between debug and release lib
 set(CMAKE_DEBUG_POSTFIX "d")
 
+set(TARGETS_EXPORT_NAME "${CMAKE_PROJECT_NAME}Targets")
+
 add_library(tinyxml2 tinyxml2.cpp tinyxml2.h)
 
 set_target_properties(tinyxml2 PROPERTIES
-        COMPILE_DEFINITIONS "TINYXML2_EXPORT"
+	DEFINE_SYMBOL "TINYXML2_EXPORT"
 	VERSION "${GENERIC_LIB_VERSION}"
 	SOVERSION "${GENERIC_LIB_SOVERSION}")
 
@@ -73,12 +73,14 @@ else()
     endif(MSVC)
 endif()
 
-# export targets for find_package config mode
+# Export cmake script that can be used by downstream project
+# via `include()`
 export(TARGETS tinyxml2
-      FILE ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Targets.cmake)
+       NAMESPACE tinyxml2::
+       FILE ${CMAKE_BINARY_DIR}/${TARGETS_EXPORT_NAME}.cmake)
 
 install(TARGETS tinyxml2
-        EXPORT ${CMAKE_PROJECT_NAME}Targets
+        EXPORT ${TARGETS_EXPORT_NAME}
         RUNTIME 
                 DESTINATION ${CMAKE_INSTALL_BINDIR}
                 COMPONENT tinyxml2_runtime
@@ -106,6 +108,9 @@ endif()
 
 install(FILES tinyxml2.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT tinyxml2_headers)
 
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+  set(LIB_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+endif()
 configure_file(tinyxml2.pc.in tinyxml2.pc @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig COMPONENT tinyxml2_config)
 
@@ -121,7 +126,6 @@ if(NOT TARGET uninstall)
 endif()
 
 include(CMakePackageConfigHelpers)
-set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
 configure_package_config_file(
   "Config.cmake.in"
   "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake"
@@ -138,6 +142,7 @@ install(FILES
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}
         COMPONENT tinyxml2_config)
 
-install(EXPORT ${CMAKE_PROJECT_NAME}Targets NAMESPACE tinyxml2::
+# Export targets for find_package config mode
+install(EXPORT ${TARGETS_EXPORT_NAME} NAMESPACE tinyxml2::
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}
         COMPONENT tinyxml2_config)
