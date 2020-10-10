@@ -3,8 +3,6 @@ TinyXML-2
 
 [![TravisCI Status](https://travis-ci.org/leethomason/tinyxml2.svg?branch=master)](https://travis-ci.org/leethomason/tinyxml2) [![AppVeyor Status](https://ci.appveyor.com/api/projects/status/github/leethomason/tinyxml2?branch=master&svg=true)](https://ci.appveyor.com/project/leethomason/tinyxml2)
 
-![C/C++ CI Unixish](https://github.com/leethomason/tinyxml2/workflows/C/C++%20CI%20Unixish/badge.svg)
-
 ![TinyXML-2 Logo](http://www.grinninglizard.com/tinyxml2/TinyXML2_small.png)
 
 TinyXML-2 is a simple, small, efficient, C++ XML parser that can be
@@ -265,31 +263,9 @@ And additionally a test file:
 * xmltest.cpp
 
 Simply compile and run. There is a visual studio 2019 project included, a simple Makefile,
-an Xcode project, a Code::Blocks project, a cmake CMakeLists.txt, and a meson.build are
-included to help you. The top of tinyxml.h even has a simple g++ command line if you are
-using Unix/Linux/BSD and don't want to use a build system.
-
-Using as a Meson Subproject
----------------------------
-
-Create a wrap file such as:
-```ini
-[wrap-git]
-url = https://github.com/leethomason/tinyxml2.git
-revision = 8.0.1  # this can be any commit-ish (tag, sha) or the special value `head`
-```
-
-or, if you prefer to not use git
-
-```ini
-[wrap-file]
-directory = tinyxml2-8.0.1  # this is the name of the directory after de-compressing
-source_url = https://github.com/leethomason/tinyxml2/archive/8.0.1.tar.gz
-source_hash = sha256sum of compressed sources
-```
-
-in your project's `subprojects/` folder, and follow the meson documentation
-for using fallbacks.
+an Xcode project, a Code::Blocks project, and a cmake CMakeLists.txt included to help you.
+The top of tinyxml.h even has a simple g++ command line if you are using Unix/Linux/BSD and
+don't want to use a build system.
 
 Building TinyXML-2 - Using vcpkg
 --------------------------------

@@ -1,75 +1,22 @@
-# For GNU conventions and targets see https://www.gnu.org/prep/standards/standards.html
-# Using GNU standards makes it easier for some users to keep doing what they are used to.
+#
+# Copyright (C) 2020 Xiaomi Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
-# 'mkdir -p' is non-portable, but it is widely supported. A portable solution
-# is elusive due to race conditions on testing the directory and creating it.
-# Anemic toolchain users can sidestep the problem using MKDIR="mkdir".
+include $(APPDIR)/Make.defs
 
-AR = ar
-ARFLAGS = cr
-RM = rm -f
-RANLIB = ranlib
-MKDIR = mkdir -p
-CXXFLAGS = -fPIC
+CXXEXT  = .cpp
+CXXSRCS = tinyxml2.cpp
 
-INSTALL = install
-INSTALL_PROGRAM = $(INSTALL)
-INSTALL_DATA = $(INSTALL) -m 644
-
-prefix = /usr/local
-bindir = $(prefix)/bin
-libdir = $(prefix)/lib
-includedir = $(prefix)/include
-
-all: xmltest staticlib
-
-rebuild: clean all
-
-xmltest: xmltest.cpp libtinyxml2.a
-
-effc:
-	gcc -Werror -Wall -Wextra -Wshadow -Wpedantic -Wformat-nonliteral \
-        -Wformat-security -Wswitch-default -Wuninitialized -Wundef \
-        -Wpointer-arith -Woverloaded-virtual -Wctor-dtor-privacy \
-        -Wnon-virtual-dtor -Woverloaded-virtual -Wsign-promo \
-        -Wno-unused-parameter -Weffc++ xmltest.cpp tinyxml2.cpp -o xmltest
-
-clean:
-	-$(RM) *.o xmltest libtinyxml2.a
-
-# Standard GNU target
-distclean:
-	-$(RM) *.o xmltest libtinyxml2.a
-
-test: xmltest
-	./xmltest
-
-# Standard GNU target
-check: xmltest
-	./xmltest
-
-staticlib: libtinyxml2.a
-
-libtinyxml2.a: tinyxml2.o
-	$(AR) $(ARFLAGS) $@ $^
-	$(RANLIB) $@
-
-tinyxml2.o: tinyxml2.cpp tinyxml2.h
-
-directories:
-	$(MKDIR) $(DESTDIR)$(prefix)
-	$(MKDIR) $(DESTDIR)$(bindir)
-	$(MKDIR) $(DESTDIR)$(libdir)
-	$(MKDIR) $(DESTDIR)$(includedir)
-
-# Standard GNU target.
-install: xmltest staticlib directories
-	$(INSTALL_PROGRAM) xmltest $(DESTDIR)$(bindir)/xmltest
-	$(INSTALL_DATA) tinyxml2.h $(DESTDIR)$(includedir)/tinyxml2.h
-	$(INSTALL_DATA) libtinyxml2.a $(DESTDIR)$(libdir)/libtinyxml2.a
-
-# Standard GNU target
-uninstall:
-	$(RM) $(DESTDIR)$(bindir)/xmltest
-	$(RM) $(DESTDIR)$(includedir)/tinyxml2.h
-	$(RM) $(DESTDIR)$(libdir)/libtinyxml2.a
+include $(APPDIR)/Application.mk
