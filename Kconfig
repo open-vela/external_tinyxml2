@@ -14,8 +14,12 @@
 # limitations under the License.
 #
 
+menu "Middle Ware: TinyXML2"
+
 config LIB_TINYXML2
 	bool "Enable TinyXML-2"
 	default n
 	---help---
 		TinyXML-2 is a simple, small, efficient, C++ XML parser that can be easily integrated into other programs.
+
+endmenu # Middle Ware: TinyXML2
