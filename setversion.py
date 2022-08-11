@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # Python program to set the version.
 ##############################################
 
@@ -19,14 +18,14 @@ def fileProcess( name, lineFunction ):
 		if not line: break
 		output += lineFunction( line )
 	filestream.close()
-
+	
 	if not output: return			# basic error checking
-
+	
 	print( "Writing file " + name )
 	filestream = open( name, "w" );
 	filestream.write( output );
 	filestream.close()
-
+	
 def echoInput( line ):
 	return line
 
@@ -109,28 +108,31 @@ fileProcess( "dox", doxRule )
 
 #### Write the CMakeLists.txt ####
 
-def cmakeRule( line ):
+def cmakeRule1( line ):
 
-	matchVersion = "project(tinyxml2 VERSION"
+	matchVersion = "set(GENERIC_LIB_VERSION"
 
 	if line[0:len(matchVersion)] == matchVersion:
 		print( "1)tinyxml2.h Major found" )
-		return matchVersion + " " + major + "." + minor + "." + build + ")\n"
+		return matchVersion + " \"" + major + "." + minor + "." + build + "\")" + "\n"
 
 	else:
 		return line;
 
-fileProcess( "CMakeLists.txt", cmakeRule )
+fileProcess( "CMakeLists.txt", cmakeRule1 )
 
+def cmakeRule2( line ):
 
-def mesonRule(line):
-	match = re.search(r"(\s*version) : '(\d+.\d+.\d+)',", line)
-	if match:
-		print("1)meson.build version found.")
-		return "{} : '{}.{}.{}',\n".format(match.group(1), major, minor, build)
-	return line
+	matchSoversion = "set(GENERIC_LIB_SOVERSION"
 
-fileProcess("meson.build", mesonRule)
+	if line[0:len(matchSoversion)] == matchSoversion:
+		print( "1)tinyxml2.h Major found" )
+		return matchSoversion + " \"" + major + "\")" + "\n"
+
+	else:
+		return line;
+
+fileProcess( "CMakeLists.txt", cmakeRule2 )
 
 print( "Release note:" )
 print( '1. Build.   g++ -Wall -DTINYXML2_DEBUG tinyxml2.cpp xmltest.cpp -o gccxmltest.exe' )
@@ -139,3 +141,5 @@ print( '3. Tag.     git tag ' + versionStr )
 print( '   OR       git tag -a ' + versionStr + ' -m [tag message]' )
 print( 'Remember to "git push" both code and tag. For the tag:' )
 print( 'git push origin [tagname]')
+
+ 
