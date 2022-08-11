@@ -79,31 +79,30 @@ distribution.
 #endif
 
 
-#if !defined(TIXMLASSERT)
 #if defined(TINYXML2_DEBUG)
 #   if defined(_MSC_VER)
 #       // "(void)0," is for suppressing C4127 warning in "assert(false)", "assert(true)" and the like
-#       define TIXMLASSERT( x )           do { if ( !((void)0,(x))) { __debugbreak(); } } while(false)
+#       define TIXMLASSERT( x )           if ( !((void)0,(x))) { __debugbreak(); }
 #   elif defined (ANDROID_NDK)
 #       include <android/log.h>
-#       define TIXMLASSERT( x )           do { if ( !(x)) { __android_log_assert( "assert", "grinliz", "ASSERT in '%s' at %d.", __FILE__, __LINE__ ); } } while(false)
+#       define TIXMLASSERT( x )           if ( !(x)) { __android_log_assert( "assert", "grinliz", "ASSERT in '%s' at %d.", __FILE__, __LINE__ ); }
 #   else
 #       include <assert.h>
 #       define TIXMLASSERT                assert
 #   endif
 #else
-#   define TIXMLASSERT( x )               do {} while(false)
+#   define TIXMLASSERT( x )               {}
 #endif
-#endif
+
 
 /* Versioning, past 1.0.14:
 	http://semver.org/
 */
-static const int TIXML2_MAJOR_VERSION = 9;
+static const int TIXML2_MAJOR_VERSION = 8;
 static const int TIXML2_MINOR_VERSION = 0;
 static const int TIXML2_PATCH_VERSION = 0;
 
-#define TINYXML2_MAJOR_VERSION 9
+#define TINYXML2_MAJOR_VERSION 8
 #define TINYXML2_MINOR_VERSION 0
 #define TINYXML2_PATCH_VERSION 0
 
@@ -136,7 +135,7 @@ class XMLPrinter;
 class TINYXML2_LIB StrPair
 {
 public:
-    enum Mode {
+    enum {
         NEEDS_ENTITY_PROCESSING			= 0x01,
         NEEDS_NEWLINE_NORMALIZATION		= 0x02,
         NEEDS_WHITESPACE_COLLAPSING     = 0x04,
@@ -589,11 +588,6 @@ public:
                || isdigit( ch )
                || ch == '.'
                || ch == '-';
-    }
-
-    inline static bool IsPrefixHex( const char* p) {
-        p = SkipWhiteSpace(p, 0);
-        return p && *p == '0' && ( *(p + 1) == 'x' || *(p + 1) == 'X');
     }
 
     inline static bool StringEqual( const char* p, const char* q, int nChar=INT_MAX )  {
@@ -1457,10 +1451,6 @@ public:
 		return QueryFloatAttribute( name, value );
 	}
 
-	XMLError QueryAttribute(const char* name, const char** value) const {
-		return QueryStringAttribute(name, value);
-	}
-
 	/// Sets the named attribute to value.
     void SetAttribute( const char* name, const char* value )	{
         XMLAttribute* a = FindOrCreateAttribute( name );
@@ -1488,7 +1478,7 @@ public:
         XMLAttribute* a = FindOrCreateAttribute(name);
         a->SetAttribute(value);
     }
-
+    
     /// Sets the named attribute to value.
     void SetAttribute( const char* name, bool value )			{
         XMLAttribute* a = FindOrCreateAttribute( name );
@@ -1874,8 +1864,9 @@ public:
     */
     void DeleteNode( XMLNode* node );
 
-    /// Clears the error flags.
-    void ClearError();
+    void ClearError() {
+        SetError(XML_SUCCESS, 0, 0);
+    }
 
     /// Return true if there was an error parsing the document.
     bool Error() const {
@@ -2331,22 +2322,16 @@ protected:
 	    the space and tabs used. A PrintSpace() override should call Print().
 	*/
     virtual void PrintSpace( int depth );
-    virtual void Print( const char* format, ... );
-    virtual void Write( const char* data, size_t size );
-    virtual void Putc( char ch );
-
-    inline void Write(const char* data) { Write(data, strlen(data)); }
+    void Print( const char* format, ... );
+    void Write( const char* data, size_t size );
+    inline void Write( const char* data )           { Write( data, strlen( data ) ); }
+    void Putc( char ch );
 
     void SealElementIfJustOpened();
     bool _elementJustOpened;
     DynArray< const char*, 10 > _stack;
 
 private:
-    /**
-       Prepares to write a new node. This includes sealing an element that was
-       just opened, and writing any whitespace necessary if not in compact mode.
-     */
-    void PrepareForNewNode( bool compactMode );
     void PrintString( const char*, bool restrictedEntitySet );	// prints out, after detecting entities.
 
     bool _firstElement;
